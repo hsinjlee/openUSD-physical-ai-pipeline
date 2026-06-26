@@ -24,13 +24,17 @@ def build_scene(output_path: str) -> Usd.Stage:
     """
     stage = Usd.Stage.CreateNew(output_path)
 
-    # Root Xform — becomes defaultPrim
     root = UsdGeom.Xform.Define(stage, "/World")
     stage.SetDefaultPrim(root.GetPrim())
-
-    # Required stage metadata
     UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
     UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+
+    # Ground plane — flat quad Mesh for robot floor collision reference
+    ground = UsdGeom.Mesh.Define(stage, "/World/GroundPlane")
+    ground.CreatePointsAttr([(-5, 0, -5), (5, 0, -5), (5, 0, 5), (-5, 0, 5)])
+    ground.CreateFaceVertexCountsAttr([4])
+    ground.CreateFaceVertexIndicesAttr([0, 1, 2, 3])
+    ground.CreateExtentAttr([(-5, 0, -5), (5, 0, 5)])
 
     stage.Save()
     return stage

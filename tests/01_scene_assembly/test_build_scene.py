@@ -23,3 +23,12 @@ def test_stage_has_default_prim(tmp_path):
     out = str(tmp_path / "scene.usda")
     stage = bs.build_scene(out)
     assert stage.GetDefaultPrim().IsValid(), "defaultPrim not set"
+
+
+def test_ground_plane_exists(tmp_path):
+    """Scene must contain a Mesh prim named GroundPlane under /World."""
+    out = str(tmp_path / "scene.usda")
+    stage = bs.build_scene(out)
+    prim = stage.GetPrimAtPath("/World/GroundPlane")
+    assert prim.IsValid(), "/World/GroundPlane prim not found"
+    assert prim.GetTypeName() == "Mesh", "GroundPlane must be a Mesh"
