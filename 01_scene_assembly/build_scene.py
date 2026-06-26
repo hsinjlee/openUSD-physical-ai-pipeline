@@ -7,6 +7,7 @@ Physical AI purpose:
   opinion strength ordering; understanding it is required for multi-asset robot scenes.
 """
 import os
+import shutil
 from pxr import Usd, UsdGeom
 
 
@@ -24,8 +25,8 @@ def build_scene(output_path: str, robot_stub_path: str | None = None) -> Usd.Sta
 
     Args:
         output_path: Where to write the .usda file.
-        robot_stub_path: Optional absolute path to a robot stub .usda to reference.
-                         Defaults to robot_stub.usda in the same directory as this script.
+        robot_stub_path: Path to a robot stub .usda to reference.
+                         Defaults to "./robot_stub.usda" (relative to the output stage).
     """
     stage = Usd.Stage.CreateNew(output_path)
 
@@ -74,7 +75,6 @@ def build_scene(output_path: str, robot_stub_path: str | None = None) -> Usd.Sta
 
 
 if __name__ == "__main__":
-    import shutil
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     # Copy robot_stub.usda next to scene.usda so the relative reference resolves
     stub_src = os.path.join(os.path.dirname(__file__), "robot_stub.usda")

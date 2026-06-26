@@ -17,7 +17,10 @@ from pxr import UsdUtils
 
 
 def validate(scene_path: str) -> list[str]:
-    """Run usdchecker on scene_path; return list of error strings (empty = clean)."""
+    """Run usdchecker on scene_path; return list of error strings (empty = clean).
+
+    Warnings from usdchecker are not included — only spec errors cause non-zero exit.
+    """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", DeprecationWarning)
         checker = UsdUtils.ComplianceChecker(

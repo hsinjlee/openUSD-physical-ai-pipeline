@@ -4,17 +4,16 @@ import shutil
 import pathlib
 import subprocess
 
-import pytest
-
 REPO_ROOT = pathlib.Path(__file__).parents[2]
 MODULE_DIR = REPO_ROOT / "01_scene_assembly"
 sys.path.insert(0, str(MODULE_DIR))
+
+import build_scene as bs  # noqa: E402 — depends on sys.path.insert above
 
 
 def test_validate_scene_exits_zero(tmp_path):
     """validate_scene.py must exit 0 when the generated scene is valid."""
     # Build the scene into tmp_path
-    import build_scene as bs
     stub_src = MODULE_DIR / "robot_stub.usda"
     shutil.copy(stub_src, tmp_path / "robot_stub.usda")
     out = str(tmp_path / "scene.usda")
