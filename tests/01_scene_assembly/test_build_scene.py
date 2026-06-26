@@ -4,7 +4,6 @@ import os
 import shutil
 import pathlib
 
-import pytest
 from pxr import Usd, UsdGeom, Sdf
 
 # Allow importing the module under test
