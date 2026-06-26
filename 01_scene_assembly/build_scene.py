@@ -7,14 +7,21 @@ Physical AI purpose:
   opinion strength ordering; understanding it is required for multi-asset robot scenes.
 """
 import os
-from pxr import Usd, UsdGeom, Sdf
+from pxr import Usd, UsdGeom
 
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 
 
 def build_scene(output_path: str) -> Usd.Stage:
-    """Create and save a USD scene; return the open stage."""
+    """Create and save a USD scene; return the open stage.
+
+    Physical AI purpose:
+      defaultPrim tells downstream consumers (ROS2 bridge, Isaac Sim loader) which
+      prim is the entry point without requiring path negotiation. upAxis=Y and
+      metersPerUnit=1.0 are required conventions for robot simulation runtimes that
+      enforce SI units and consistent gravity direction.
+    """
     stage = Usd.Stage.CreateNew(output_path)
 
     # Root Xform — becomes defaultPrim
