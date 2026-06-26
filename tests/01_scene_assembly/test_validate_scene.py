@@ -1,5 +1,4 @@
 """Integration test: generated scene.usda must pass usdchecker with zero errors."""
-import os
 import sys
 import shutil
 import pathlib
