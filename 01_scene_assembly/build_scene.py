@@ -27,6 +27,8 @@ def build_scene(output_path: str, robot_stub_path: str | None = None) -> Usd.Sta
         output_path: Where to write the .usda file.
         robot_stub_path: Path to a robot stub .usda to reference.
                          Defaults to "./robot_stub.usda" (relative to the output stage).
+                         Callers are responsible for ensuring the file exists at that path;
+                         the __main__ block copies robot_stub.usda into OUTPUT_DIR for this.
     """
     stage = Usd.Stage.CreateNew(output_path)
 
@@ -45,8 +47,7 @@ def build_scene(output_path: str, robot_stub_path: str | None = None) -> Usd.Sta
     # VariantSet: environment — switches between indoor/outdoor robot contexts.
     # Physical AI use: swap lighting, obstacle sets, and floor materials per environment
     # without duplicating the full scene graph.
-    vsets = root.GetPrim().GetVariantSets()
-    env_vset = vsets.AddVariantSet("environment")
+    env_vset = root.GetPrim().GetVariantSets().AddVariantSet("environment")
 
     env_vset.AddVariant("indoor")
     env_vset.SetVariantSelection("indoor")

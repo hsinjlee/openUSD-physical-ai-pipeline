@@ -19,8 +19,11 @@ from pxr import UsdUtils
 def validate(scene_path: str) -> list[str]:
     """Run usdchecker on scene_path; return list of error strings (empty = clean).
 
-    Warnings from usdchecker are not included — only spec errors cause non-zero exit.
+    Warnings and GetFailedChecks() rule violations are not included — only spec
+    errors (GetErrors()) cause a non-zero exit.
     """
+    # TODO: UsdUtils.ComplianceChecker is deprecated in usd-core ≥24.x in favour of
+    # the Usd Validation Framework. Migrate when usd-core drops ComplianceChecker.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", DeprecationWarning)
         checker = UsdUtils.ComplianceChecker(
