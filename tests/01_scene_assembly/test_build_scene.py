@@ -1,6 +1,8 @@
 """Tests for 01_scene_assembly/build_scene.py."""
 import sys
 import os
+import shutil
+import pathlib
 
 import pytest
 from pxr import Usd, UsdGeom, Sdf
@@ -58,7 +60,6 @@ def test_environment_default_variant(tmp_path):
 
 def test_robot_reference_exists(tmp_path):
     """Scene must have a /World/Robot prim populated via a reference."""
-    import shutil, pathlib
     # Copy robot_stub.usda next to the output so the reference resolves
     stub_src = pathlib.Path(__file__).parents[2] / "01_scene_assembly" / "robot_stub.usda"
     shutil.copy(stub_src, tmp_path / "robot_stub.usda")
