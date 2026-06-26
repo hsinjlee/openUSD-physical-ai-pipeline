@@ -65,7 +65,7 @@ def build_scene(output_path: str, robot_stub_path: str | None = None) -> Usd.Sta
     # Physical AI use: robot assets are maintained separately and referenced in;
     # this decouples scene layout from robot asset versioning.
     if robot_stub_path is None:
-        robot_stub_path = os.path.join(os.path.dirname(__file__), "robot_stub.usda")
+        robot_stub_path = "./robot_stub.usda"
     robot_xform = UsdGeom.Xform.Define(stage, "/World/Robot")
     robot_xform.GetPrim().GetReferences().AddReference(robot_stub_path)
 
@@ -74,7 +74,13 @@ def build_scene(output_path: str, robot_stub_path: str | None = None) -> Usd.Sta
 
 
 if __name__ == "__main__":
+    import shutil
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    # Copy robot_stub.usda next to scene.usda so the relative reference resolves
+    stub_src = os.path.join(os.path.dirname(__file__), "robot_stub.usda")
+    stub_dst = os.path.join(OUTPUT_DIR, "robot_stub.usda")
+    if not os.path.exists(stub_dst):
+        shutil.copy(stub_src, stub_dst)
     out = os.path.join(OUTPUT_DIR, "scene.usda")
     build_scene(out)
     print(f"Saved: {out}")

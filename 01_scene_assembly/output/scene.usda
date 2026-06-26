@@ -21,7 +21,7 @@ def Xform "World" (
     }
 
     def Xform "Robot" (
-        prepend references = @/home/f042/p/openUSD-physical-ai-pipeline/01_scene_assembly/robot_stub.usda@
+        prepend references = @./robot_stub.usda@
     )
     {
     }
