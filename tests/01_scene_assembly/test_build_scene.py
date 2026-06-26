@@ -6,7 +6,7 @@ import pytest
 from pxr import Usd, UsdGeom, Sdf
 
 # Allow importing the module under test
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "01_scene_assembly"))
 
 import build_scene as bs   # relies on sys.path.insert above
 
