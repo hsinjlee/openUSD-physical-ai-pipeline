@@ -53,4 +53,4 @@ def test_environment_default_variant(tmp_path):
     stage = bs.build_scene(out)
     root = stage.GetPrimAtPath("/World")
     vset = root.GetVariantSets().GetVariantSet("environment")
-    assert vset.GetVariantSelection() == "indoor"
+    assert vset.GetVariantSelection() == "indoor", "default 'environment' selection must be 'indoor'"
