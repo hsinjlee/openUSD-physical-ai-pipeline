@@ -56,7 +56,7 @@ openUSD-physical-ai-pipeline/
 and what comes next — so the next session picks up cleanly)
 
 ### Completed:
-- [ ] 01_scene_assembly
+- [x] 01_scene_assembly — LIVRPS composition, VariantSets, defaultPrim, usdchecker ✓
 - [ ] 02_sensor_simulation
 - [ ] 03_robot_asset_library
 - [ ] 04_physics_annotation
@@ -64,4 +64,5 @@ and what comes next — so the next session picks up cleanly)
 - [ ] 06_ros2_usdz_export
 
 ### Next session should start with:
-(fill this in after each session)
+Implement 02_sensor_simulation: custom attributes for LiDAR and camera sensor prims.
+Reference pattern: build_scene.py / validate_scene.py from 01_scene_assembly.
