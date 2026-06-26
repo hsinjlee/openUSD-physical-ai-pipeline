@@ -32,3 +32,25 @@ def test_ground_plane_exists(tmp_path):
     prim = stage.GetPrimAtPath("/World/GroundPlane")
     assert prim.IsValid(), "/World/GroundPlane prim not found"
     assert prim.GetTypeName() == "Mesh", "GroundPlane must be a Mesh"
+
+
+def test_environment_variantset(tmp_path):
+    """Root prim must have an 'environment' VariantSet with 'indoor' and 'outdoor' variants."""
+    out = str(tmp_path / "scene.usda")
+    stage = bs.build_scene(out)
+    root = stage.GetPrimAtPath("/World")
+    vsets = root.GetVariantSets()
+    assert vsets.HasVariantSet("environment"), "'environment' VariantSet missing"
+    vset = vsets.GetVariantSet("environment")
+    names = vset.GetVariantNames()
+    assert "indoor" in names, "'indoor' variant missing"
+    assert "outdoor" in names, "'outdoor' variant missing"
+
+
+def test_environment_default_variant(tmp_path):
+    """Default selection for 'environment' VariantSet must be 'indoor'."""
+    out = str(tmp_path / "scene.usda")
+    stage = bs.build_scene(out)
+    root = stage.GetPrimAtPath("/World")
+    vset = root.GetVariantSets().GetVariantSet("environment")
+    assert vset.GetVariantSelection() == "indoor"

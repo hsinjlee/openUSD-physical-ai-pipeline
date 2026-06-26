@@ -36,6 +36,26 @@ def build_scene(output_path: str) -> Usd.Stage:
     ground.CreateFaceVertexIndicesAttr([0, 1, 2, 3])
     ground.CreateExtentAttr([(-5, 0, -5), (5, 0, 5)])
 
+    # VariantSet: environment — switches between indoor/outdoor robot contexts.
+    # Physical AI use: swap lighting, obstacle sets, and floor materials per environment
+    # without duplicating the full scene graph.
+    vsets = root.GetPrim().GetVariantSets()
+    env_vset = vsets.AddVariantSet("environment")
+
+    env_vset.AddVariant("indoor")
+    env_vset.SetVariantSelection("indoor")
+    with env_vset.GetVariantEditContext():
+        # Indoor variant: add a ceiling plane
+        ceiling = UsdGeom.Mesh.Define(stage, "/World/Ceiling")
+        ceiling.CreatePointsAttr([(-5, 3, -5), (5, 3, -5), (5, 3, 5), (-5, 3, 5)])
+        ceiling.CreateFaceVertexCountsAttr([4])
+        ceiling.CreateFaceVertexIndicesAttr([0, 1, 2, 3])
+        ceiling.CreateExtentAttr([(-5, 3, -5), (5, 3, 5)])
+
+    env_vset.AddVariant("outdoor")
+    # Outdoor variant is intentionally empty — open sky, no ceiling
+    env_vset.SetVariantSelection("indoor")  # default selection
+
     stage.Save()
     return stage
 
