@@ -13,7 +13,7 @@ from pxr import Usd, UsdGeom
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 
 
-def build_scene(output_path: str) -> Usd.Stage:
+def build_scene(output_path: str, robot_stub_path: str | None = None) -> Usd.Stage:
     """Create and save a USD scene; return the open stage.
 
     Physical AI purpose:
@@ -21,6 +21,11 @@ def build_scene(output_path: str) -> Usd.Stage:
       prim is the entry point without requiring path negotiation. upAxis=Y and
       metersPerUnit=1.0 are required conventions for robot simulation runtimes that
       enforce SI units and consistent gravity direction.
+
+    Args:
+        output_path: Where to write the .usda file.
+        robot_stub_path: Optional absolute path to a robot stub .usda to reference.
+                         Defaults to robot_stub.usda in the same directory as this script.
     """
     stage = Usd.Stage.CreateNew(output_path)
 
@@ -55,6 +60,14 @@ def build_scene(output_path: str) -> Usd.Stage:
     env_vset.AddVariant("outdoor")
     # Outdoor variant is intentionally empty — open sky, no ceiling
     env_vset.SetVariantSelection("indoor")  # default selection
+
+    # Reference: robot stub — demonstrates LIVRPS 'R' (References) layer.
+    # Physical AI use: robot assets are maintained separately and referenced in;
+    # this decouples scene layout from robot asset versioning.
+    if robot_stub_path is None:
+        robot_stub_path = os.path.join(os.path.dirname(__file__), "robot_stub.usda")
+    robot_xform = UsdGeom.Xform.Define(stage, "/World/Robot")
+    robot_xform.GetPrim().GetReferences().AddReference(robot_stub_path)
 
     stage.Save()
     return stage

@@ -54,3 +54,18 @@ def test_environment_default_variant(tmp_path):
     root = stage.GetPrimAtPath("/World")
     vset = root.GetVariantSets().GetVariantSet("environment")
     assert vset.GetVariantSelection() == "indoor", "default 'environment' selection must be 'indoor'"
+
+
+def test_robot_reference_exists(tmp_path):
+    """Scene must have a /World/Robot prim populated via a reference."""
+    import shutil, pathlib
+    # Copy robot_stub.usda next to the output so the reference resolves
+    stub_src = pathlib.Path(__file__).parents[2] / "01_scene_assembly" / "robot_stub.usda"
+    shutil.copy(stub_src, tmp_path / "robot_stub.usda")
+
+    out = str(tmp_path / "scene.usda")
+    stage = bs.build_scene(out, robot_stub_path=str(tmp_path / "robot_stub.usda"))
+    robot = stage.GetPrimAtPath("/World/Robot")
+    assert robot.IsValid(), "/World/Robot not found"
+    base = stage.GetPrimAtPath("/World/Robot/Base")
+    assert base.IsValid(), "/World/Robot/Base not found (reference not composed)"
