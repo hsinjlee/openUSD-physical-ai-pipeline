@@ -1,0 +1,44 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "World" (
+    variants = {
+        string environment = "indoor"
+    }
+    prepend variantSets = "environment"
+)
+{
+    def Mesh "GroundPlane"
+    {
+        float3[] extent = [(-5, 0, -5), (5, 0, 5)]
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+        point3f[] points = [(-5, 0, -5), (5, 0, -5), (5, 0, 5), (-5, 0, 5)]
+    }
+
+    def Xform "Robot" (
+        prepend references = @/home/f042/p/openUSD-physical-ai-pipeline/01_scene_assembly/robot_stub.usda@
+    )
+    {
+    }
+    variantSet "environment" = {
+        "indoor" {
+            def Mesh "Ceiling"
+            {
+                float3[] extent = [(-5, 3, -5), (5, 3, 5)]
+                int[] faceVertexCounts = [4]
+                int[] faceVertexIndices = [0, 1, 2, 3]
+                point3f[] points = [(-5, 3, -5), (5, 3, -5), (5, 3, 5), (-5, 3, 5)]
+            }
+
+        }
+        "outdoor" {
+
+        }
+    }
+}
+
