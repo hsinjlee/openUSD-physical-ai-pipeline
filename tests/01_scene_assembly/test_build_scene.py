@@ -1,5 +1,4 @@
 """Tests for 01_scene_assembly/build_scene.py."""
-import importlib
 import sys
 import os
 
