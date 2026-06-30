@@ -233,6 +233,7 @@ def test_lidar_attributes_present(tmp_path):
     stage = bs.build_sensors(out)
     prim = stage.GetPrimAtPath("/SensorRig/LiDAR")
     expected = [
+        "sensor:type",
         "sensor:lidar:minRange",
         "sensor:lidar:maxRange",
         "sensor:lidar:horizontalFovStart",
@@ -253,6 +254,7 @@ def test_lidar_attribute_values(tmp_path):
     out = str(tmp_path / "sensor_rig.usda")
     stage = bs.build_sensors(out)
     prim = stage.GetPrimAtPath("/SensorRig/LiDAR")
+    assert prim.GetAttribute("sensor:type").Get() == "lidar"
     assert prim.GetAttribute("sensor:lidar:minRange").Get() == 0.1
     assert prim.GetAttribute("sensor:lidar:maxRange").Get() == 100.0
     assert prim.GetAttribute("sensor:lidar:horizontalFovStart").Get() == -180.0
@@ -302,6 +304,9 @@ def _add_lidar(stage: Usd.Stage, path: str) -> UsdGeom.Xform:
     """
     lidar = UsdGeom.Xform.Define(stage, path)
     prim = lidar.GetPrim()
+
+    # Sensor type identifier for programmatic discovery
+    prim.CreateAttribute("sensor:type", Sdf.ValueTypeNames.Token).Set("lidar")
 
     float_attrs = {
         "sensor:lidar:minRange":            (Sdf.ValueTypeNames.Float, 0.1),
@@ -409,6 +414,7 @@ def test_camera_custom_attributes(tmp_path):
     out = str(tmp_path / "sensor_rig.usda")
     stage = bs.build_sensors(out)
     prim = stage.GetPrimAtPath("/SensorRig/Camera")
+    assert prim.GetAttribute("sensor:type").Get() == "camera"
     assert prim.GetAttribute("sensor:camera:imageWidth").Get() == 1920
     assert prim.GetAttribute("sensor:camera:imageHeight").Get() == 1080
     assert prim.GetAttribute("sensor:camera:frameRate").Get() == 30.0
@@ -445,6 +451,7 @@ def _add_camera(stage: Usd.Stage, path: str) -> UsdGeom.Camera:
 
     # Custom sensor attributes for runtime config
     prim = cam.GetPrim()
+    prim.CreateAttribute("sensor:type", Sdf.ValueTypeNames.Token).Set("camera")
     prim.CreateAttribute("sensor:camera:imageWidth",  Sdf.ValueTypeNames.Int).Set(1920)
     prim.CreateAttribute("sensor:camera:imageHeight", Sdf.ValueTypeNames.Int).Set(1080)
     prim.CreateAttribute("sensor:camera:frameRate",   Sdf.ValueTypeNames.Float).Set(30.0)
