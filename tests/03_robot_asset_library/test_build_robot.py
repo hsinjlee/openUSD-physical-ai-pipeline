@@ -128,3 +128,25 @@ def test_arm_bound_to_plastic(tmp_path):
     assert "MaterialBindingAPI" in arm_geom.GetAppliedSchemas()
     bound, _ = UsdShade.MaterialBindingAPI(arm_geom).ComputeBoundMaterial()
     assert bound.GetPath() == Sdf.Path("/Robot/Materials/Plastic")
+
+
+def test_base_geom_semantic_class(tmp_path):
+    """Base/Geom must carry a constant primvars:semantic:class = 'robot_base'."""
+    out = str(tmp_path / "robot.usda")
+    stage = br.build_robot(out)
+    base_geom = stage.GetPrimAtPath("/Robot/Base/Geom")
+    pv = UsdGeom.PrimvarsAPI(base_geom).GetPrimvar("semantic:class")
+    assert pv.IsDefined(), "primvars:semantic:class missing on Base/Geom"
+    assert pv.Get() == "robot_base"
+    assert pv.GetInterpolation() == UsdGeom.Tokens.constant
+
+
+def test_arm_geom_semantic_class(tmp_path):
+    """Arm/Geom must carry a constant primvars:semantic:class = 'robot_arm'."""
+    out = str(tmp_path / "robot.usda")
+    stage = br.build_robot(out)
+    arm_geom = stage.GetPrimAtPath("/Robot/Arm/Geom")
+    pv = UsdGeom.PrimvarsAPI(arm_geom).GetPrimvar("semantic:class")
+    assert pv.IsDefined(), "primvars:semantic:class missing on Arm/Geom"
+    assert pv.Get() == "robot_arm"
+    assert pv.GetInterpolation() == UsdGeom.Tokens.constant

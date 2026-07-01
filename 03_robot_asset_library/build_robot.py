@@ -62,6 +62,19 @@ def _bind_material(geom_prim: Usd.Prim, material: UsdShade.Material) -> None:
     UsdShade.MaterialBindingAPI.Apply(geom_prim).Bind(material)
 
 
+def _set_semantic_class(geom_prim: Usd.Prim, class_label: str) -> None:
+    """Tag a geometry prim with a constant semantic-class primvar.
+
+    Physical AI purpose:
+      primvars:semantic:class is read by synthetic-data pipelines (e.g. domain
+      randomization / segmentation-mask renderers) to assign a per-pixel class
+      ID without a side-channel label file — the label travels with the prim.
+    """
+    UsdGeom.PrimvarsAPI(geom_prim).CreatePrimvar(
+        "semantic:class", Sdf.ValueTypeNames.String, UsdGeom.Tokens.constant
+    ).Set(class_label)
+
+
 def build_robot(output_path: str) -> Usd.Stage:
     """Create and save a USD robot asset stage; return the open stage.
 
@@ -93,6 +106,7 @@ def build_robot(output_path: str) -> Usd.Stage:
     UsdGeom.Xform.Define(stage, "/Robot/Base")
     base_geom = _add_geom(stage, "/Robot/Base", size=1.0)
     _bind_material(base_geom.GetPrim(), metal)
+    _set_semantic_class(base_geom.GetPrim(), "robot_base")
 
     # Arm link — offset above Base. Physical AI use: link-local transforms are
     # what UsdPhysics.RevoluteJoint (module 04) will connect between parent and
@@ -101,6 +115,7 @@ def build_robot(output_path: str) -> Usd.Stage:
     UsdGeom.XformCommonAPI(arm).SetTranslate(Gf.Vec3d(0.0, 1.0, 0.0))
     arm_geom = _add_geom(stage, "/Robot/Arm", size=0.5)
     _bind_material(arm_geom.GetPrim(), plastic)
+    _set_semantic_class(arm_geom.GetPrim(), "robot_arm")
 
     stage.Save()
     return stage
