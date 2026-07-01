@@ -5,7 +5,7 @@ import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parents[2] / "03_robot_asset_library"))
 
 import build_robot as br  # noqa: E402
-from pxr import Usd, UsdGeom, Gf
+from pxr import Usd, UsdGeom, Gf, UsdShade, Sdf
 import pytest
 
 
@@ -83,3 +83,48 @@ def test_geom_sizes(tmp_path):
     arm_cube = UsdGeom.Cube(stage.GetPrimAtPath("/Robot/Arm/Geom"))
     assert base_cube.GetSizeAttr().Get() == pytest.approx(1.0)
     assert arm_cube.GetSizeAttr().Get() == pytest.approx(0.5)
+
+
+def test_materials_exist(tmp_path):
+    """Metal and Plastic materials must exist under /Robot/Materials."""
+    out = str(tmp_path / "robot.usda")
+    stage = br.build_robot(out)
+    metal = stage.GetPrimAtPath("/Robot/Materials/Metal")
+    plastic = stage.GetPrimAtPath("/Robot/Materials/Plastic")
+    assert metal.IsValid() and metal.GetTypeName() == "Material"
+    assert plastic.IsValid() and plastic.GetTypeName() == "Material"
+
+
+def test_material_shader_inputs(tmp_path):
+    """Each material's UsdPreviewSurface shader must carry PBR inputs."""
+    out = str(tmp_path / "robot.usda")
+    stage = br.build_robot(out)
+    metal_shader = UsdShade.Shader(stage.GetPrimAtPath("/Robot/Materials/Metal/PreviewSurface"))
+    assert metal_shader.GetIdAttr().Get() == "UsdPreviewSurface"
+    assert metal_shader.GetInput("metallic").Get() == pytest.approx(0.9)
+    assert metal_shader.GetInput("roughness").Get() == pytest.approx(0.3)
+
+    plastic_shader = UsdShade.Shader(stage.GetPrimAtPath("/Robot/Materials/Plastic/PreviewSurface"))
+    assert plastic_shader.GetIdAttr().Get() == "UsdPreviewSurface"
+    assert plastic_shader.GetInput("metallic").Get() == pytest.approx(0.0)
+    assert plastic_shader.GetInput("roughness").Get() == pytest.approx(0.6)
+
+
+def test_base_bound_to_metal(tmp_path):
+    """Base/Geom must be bound to the Metal material via MaterialBindingAPI."""
+    out = str(tmp_path / "robot.usda")
+    stage = br.build_robot(out)
+    base_geom = stage.GetPrimAtPath("/Robot/Base/Geom")
+    assert "MaterialBindingAPI" in base_geom.GetAppliedSchemas()
+    bound, _ = UsdShade.MaterialBindingAPI(base_geom).ComputeBoundMaterial()
+    assert bound.GetPath() == Sdf.Path("/Robot/Materials/Metal")
+
+
+def test_arm_bound_to_plastic(tmp_path):
+    """Arm/Geom must be bound to the Plastic material via MaterialBindingAPI."""
+    out = str(tmp_path / "robot.usda")
+    stage = br.build_robot(out)
+    arm_geom = stage.GetPrimAtPath("/Robot/Arm/Geom")
+    assert "MaterialBindingAPI" in arm_geom.GetAppliedSchemas()
+    bound, _ = UsdShade.MaterialBindingAPI(arm_geom).ComputeBoundMaterial()
+    assert bound.GetPath() == Sdf.Path("/Robot/Materials/Plastic")
