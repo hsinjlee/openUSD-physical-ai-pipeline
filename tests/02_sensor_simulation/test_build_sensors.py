@@ -113,3 +113,14 @@ def test_camera_custom_attributes(tmp_path):
     assert prim.GetAttribute("sensor:camera:imageWidth").Get() == 1920
     assert prim.GetAttribute("sensor:camera:imageHeight").Get() == 1080
     assert prim.GetAttribute("sensor:camera:frameRate").Get() == 30.0
+
+
+def test_usdchecker_passes(tmp_path):
+    """Generated sensor_rig.usda must pass usdchecker with zero errors."""
+    import sys
+    sys.path.insert(0, str(pathlib.Path(__file__).parents[2] / "02_sensor_simulation"))
+    import validate_sensors as vs
+    out = str(tmp_path / "sensor_rig.usda")
+    bs.build_sensors(out)
+    errors = vs.validate(out)
+    assert errors == [], f"usdchecker errors: {errors}"
