@@ -13,6 +13,37 @@ from pxr import Usd, UsdGeom, Sdf
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 
 
+def _add_lidar(stage: Usd.Stage, path: str) -> UsdGeom.Xform:
+    """Define a LiDAR sensor prim with custom attributes.
+
+    Physical AI purpose:
+      These attributes map directly to Isaac Sim's RangeSensorCreateLidar
+      parameters and NVIDIA's sensor extension schema, letting the same USD
+      file drive both simulation and hardware-in-the-loop configs.
+    """
+    lidar = UsdGeom.Xform.Define(stage, path)
+    prim = lidar.GetPrim()
+
+    # Sensor type identifier for programmatic discovery
+    prim.CreateAttribute("sensor:type", Sdf.ValueTypeNames.Token).Set("lidar")
+
+    float_attrs = {
+        "sensor:lidar:minRange":            (Sdf.ValueTypeNames.Float, 0.1),
+        "sensor:lidar:maxRange":            (Sdf.ValueTypeNames.Float, 100.0),
+        "sensor:lidar:horizontalFovStart":  (Sdf.ValueTypeNames.Float, -180.0),
+        "sensor:lidar:horizontalFovEnd":    (Sdf.ValueTypeNames.Float, 180.0),
+        "sensor:lidar:verticalFovLower":    (Sdf.ValueTypeNames.Float, -15.0),
+        "sensor:lidar:verticalFovUpper":    (Sdf.ValueTypeNames.Float, 15.0),
+        "sensor:lidar:rotationFrequency":   (Sdf.ValueTypeNames.Float, 10.0),
+        "sensor:lidar:horizontalResolution":(Sdf.ValueTypeNames.Float, 0.2),
+    }
+    for name, (type_name, value) in float_attrs.items():
+        prim.CreateAttribute(name, type_name).Set(value)
+
+    prim.CreateAttribute("sensor:lidar:numChannels", Sdf.ValueTypeNames.Int).Set(16)
+    return lidar
+
+
 def build_sensors(output_path: str) -> Usd.Stage:
     """Create and save a USD sensor-rig stage; return the open stage.
 
@@ -27,6 +58,8 @@ def build_sensors(output_path: str) -> Usd.Stage:
     stage.SetDefaultPrim(root.GetPrim())
     UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
     UsdGeom.SetStageMetersPerUnit(stage, 1.0)
+
+    _add_lidar(stage, "/SensorRig/LiDAR")
 
     stage.Save()
     return stage
