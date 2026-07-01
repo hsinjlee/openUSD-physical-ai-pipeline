@@ -3,8 +3,7 @@
 ## Project Purpose
 Demonstrate OpenUSD for Physical AI pipelines: scene assembly, robot asset 
 description, sensor simulation, physics annotation, and TensorRT inference 
-configuration. This is a portfolio project targeting NVIDIA, Qualcomm, 
-Advantech roles in Taiwan.
+configuration. 
 
 ## Tech Stack
 - Python 3.10+
