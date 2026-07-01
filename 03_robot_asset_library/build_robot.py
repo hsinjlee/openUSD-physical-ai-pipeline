@@ -14,6 +14,19 @@ from pxr import Usd, UsdGeom, UsdShade, Sdf, Kind, Gf
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 
 
+def _add_geom(stage: Usd.Stage, link_path: str, size: float) -> UsdGeom.Cube:
+    """Define the renderable/collidable Cube geometry for a robot link.
+
+    Physical AI purpose:
+      Separating Geom from the link Xform lets module 04 (physics annotation)
+      attach UsdPhysics.CollisionAPI directly to this shape prim without
+      touching the link's transform hierarchy.
+    """
+    geom = UsdGeom.Cube.Define(stage, f"{link_path}/Geom")
+    geom.CreateSizeAttr(size)
+    return geom
+
+
 def build_robot(output_path: str) -> Usd.Stage:
     """Create and save a USD robot asset stage; return the open stage.
 
@@ -32,12 +45,14 @@ def build_robot(output_path: str) -> Usd.Stage:
 
     # Base link — the robot's fixed-frame root link, at the origin.
     UsdGeom.Xform.Define(stage, "/Robot/Base")
+    _add_geom(stage, "/Robot/Base", size=1.0)
 
     # Arm link — offset above Base. Physical AI use: link-local transforms are
     # what UsdPhysics.RevoluteJoint (module 04) will connect between parent and
     # child frames; establishing them now keeps the hierarchy joint-ready.
     arm = UsdGeom.Xform.Define(stage, "/Robot/Arm")
     UsdGeom.XformCommonAPI(arm).SetTranslate(Gf.Vec3d(0.0, 1.0, 0.0))
+    _add_geom(stage, "/Robot/Arm", size=0.5)
 
     stage.Save()
     return stage
