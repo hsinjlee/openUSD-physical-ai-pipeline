@@ -67,16 +67,15 @@ def test_lidar_attribute_values(tmp_path):
     stage = bs.build_sensors(out)
     prim = stage.GetPrimAtPath("/SensorRig/LiDAR")
     assert prim.GetAttribute("sensor:type").Get() == "lidar"
-    # sensor:lidar:* are stored as 32-bit Float (matches Isaac Sim's
-    # RangeSensorCreateLidar schema); approx accounts for float32 rounding.
-    assert prim.GetAttribute("sensor:lidar:minRange").Get() == pytest.approx(0.1)
-    assert prim.GetAttribute("sensor:lidar:maxRange").Get() == pytest.approx(100.0)
-    assert prim.GetAttribute("sensor:lidar:horizontalFovStart").Get() == pytest.approx(-180.0)
-    assert prim.GetAttribute("sensor:lidar:horizontalFovEnd").Get() == pytest.approx(180.0)
-    assert prim.GetAttribute("sensor:lidar:verticalFovLower").Get() == pytest.approx(-15.0)
-    assert prim.GetAttribute("sensor:lidar:verticalFovUpper").Get() == pytest.approx(15.0)
-    assert prim.GetAttribute("sensor:lidar:rotationFrequency").Get() == pytest.approx(10.0)
-    assert prim.GetAttribute("sensor:lidar:horizontalResolution").Get() == pytest.approx(0.2)
+    # sensor:lidar:* are stored as Double, so they round-trip exactly.
+    assert prim.GetAttribute("sensor:lidar:minRange").Get() == 0.1
+    assert prim.GetAttribute("sensor:lidar:maxRange").Get() == 100.0
+    assert prim.GetAttribute("sensor:lidar:horizontalFovStart").Get() == -180.0
+    assert prim.GetAttribute("sensor:lidar:horizontalFovEnd").Get() == 180.0
+    assert prim.GetAttribute("sensor:lidar:verticalFovLower").Get() == -15.0
+    assert prim.GetAttribute("sensor:lidar:verticalFovUpper").Get() == 15.0
+    assert prim.GetAttribute("sensor:lidar:rotationFrequency").Get() == 10.0
+    assert prim.GetAttribute("sensor:lidar:horizontalResolution").Get() == 0.2
     assert prim.GetAttribute("sensor:lidar:numChannels").Get() == 16
 
 
@@ -117,8 +116,6 @@ def test_camera_custom_attributes(tmp_path):
 
 def test_usdchecker_passes(tmp_path):
     """Generated sensor_rig.usda must pass usdchecker with zero errors."""
-    import sys
-    sys.path.insert(0, str(pathlib.Path(__file__).parents[2] / "02_sensor_simulation"))
     import validate_sensors as vs
     out = str(tmp_path / "sensor_rig.usda")
     bs.build_sensors(out)

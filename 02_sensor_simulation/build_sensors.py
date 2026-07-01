@@ -27,15 +27,17 @@ def _add_lidar(stage: Usd.Stage, path: str) -> UsdGeom.Xform:
     # Sensor type identifier for programmatic discovery
     prim.CreateAttribute("sensor:type", Sdf.ValueTypeNames.Token).Set("lidar")
 
+    # Double (not Float): these are custom attributes with no schema constraint,
+    # so store full precision rather than forcing float32 rounding on consumers.
     float_attrs = {
-        "sensor:lidar:minRange":            (Sdf.ValueTypeNames.Float, 0.1),
-        "sensor:lidar:maxRange":            (Sdf.ValueTypeNames.Float, 100.0),
-        "sensor:lidar:horizontalFovStart":  (Sdf.ValueTypeNames.Float, -180.0),
-        "sensor:lidar:horizontalFovEnd":    (Sdf.ValueTypeNames.Float, 180.0),
-        "sensor:lidar:verticalFovLower":    (Sdf.ValueTypeNames.Float, -15.0),
-        "sensor:lidar:verticalFovUpper":    (Sdf.ValueTypeNames.Float, 15.0),
-        "sensor:lidar:rotationFrequency":   (Sdf.ValueTypeNames.Float, 10.0),
-        "sensor:lidar:horizontalResolution":(Sdf.ValueTypeNames.Float, 0.2),
+        "sensor:lidar:minRange":            (Sdf.ValueTypeNames.Double, 0.1),
+        "sensor:lidar:maxRange":            (Sdf.ValueTypeNames.Double, 100.0),
+        "sensor:lidar:horizontalFovStart":  (Sdf.ValueTypeNames.Double, -180.0),
+        "sensor:lidar:horizontalFovEnd":    (Sdf.ValueTypeNames.Double, 180.0),
+        "sensor:lidar:verticalFovLower":    (Sdf.ValueTypeNames.Double, -15.0),
+        "sensor:lidar:verticalFovUpper":    (Sdf.ValueTypeNames.Double, 15.0),
+        "sensor:lidar:rotationFrequency":   (Sdf.ValueTypeNames.Double, 10.0),
+        "sensor:lidar:horizontalResolution":(Sdf.ValueTypeNames.Double, 0.2),
     }
     for name, (type_name, value) in float_attrs.items():
         prim.CreateAttribute(name, type_name).Set(value)
@@ -65,7 +67,8 @@ def _add_camera(stage: Usd.Stage, path: str) -> UsdGeom.Camera:
     prim.CreateAttribute("sensor:type", Sdf.ValueTypeNames.Token).Set("camera")
     prim.CreateAttribute("sensor:camera:imageWidth",  Sdf.ValueTypeNames.Int).Set(1920)
     prim.CreateAttribute("sensor:camera:imageHeight", Sdf.ValueTypeNames.Int).Set(1080)
-    prim.CreateAttribute("sensor:camera:frameRate",   Sdf.ValueTypeNames.Float).Set(30.0)
+    # Double (not Float): custom attribute, no schema constraint — full precision.
+    prim.CreateAttribute("sensor:camera:frameRate",   Sdf.ValueTypeNames.Double).Set(30.0)
     return cam
 
 

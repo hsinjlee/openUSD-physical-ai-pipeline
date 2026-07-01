@@ -9,15 +9,15 @@ def Xform "SensorRig"
 {
     def Xform "LiDAR"
     {
-        custom float sensor:lidar:horizontalFovEnd = 180
-        custom float sensor:lidar:horizontalFovStart = -180
-        custom float sensor:lidar:horizontalResolution = 0.2
-        custom float sensor:lidar:maxRange = 100
-        custom float sensor:lidar:minRange = 0.1
+        custom double sensor:lidar:horizontalFovEnd = 180
+        custom double sensor:lidar:horizontalFovStart = -180
+        custom double sensor:lidar:horizontalResolution = 0.2
+        custom double sensor:lidar:maxRange = 100
+        custom double sensor:lidar:minRange = 0.1
         custom int sensor:lidar:numChannels = 16
-        custom float sensor:lidar:rotationFrequency = 10
-        custom float sensor:lidar:verticalFovLower = -15
-        custom float sensor:lidar:verticalFovUpper = 15
+        custom double sensor:lidar:rotationFrequency = 10
+        custom double sensor:lidar:verticalFovLower = -15
+        custom double sensor:lidar:verticalFovUpper = 15
         custom token sensor:type = "lidar"
     }
 
@@ -26,7 +26,7 @@ def Xform "SensorRig"
         float2 clippingRange = (0.1, 1000)
         float focalLength = 24
         float horizontalAperture = 20.955
-        custom float sensor:camera:frameRate = 30
+        custom double sensor:camera:frameRate = 30
         custom int sensor:camera:imageHeight = 1080
         custom int sensor:camera:imageWidth = 1920
         custom token sensor:type = "camera"
