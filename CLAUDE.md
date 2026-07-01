@@ -56,12 +56,12 @@ and what comes next — so the next session picks up cleanly)
 
 ### Completed:
 - [x] 01_scene_assembly — LIVRPS composition, VariantSets, defaultPrim, usdchecker ✓
-- [ ] 02_sensor_simulation
+- [x] 02_sensor_simulation — LiDAR + Camera sensor prims, custom sensor:* attributes, usdchecker ✓
 - [ ] 03_robot_asset_library
 - [ ] 04_physics_annotation
 - [ ] 05_tensorrt_inference_bridge
 - [ ] 06_ros2_usdz_export
 
 ### Next session should start with:
-Implement 02_sensor_simulation: custom attributes for LiDAR and camera sensor prims.
-Reference pattern: build_scene.py / validate_scene.py from 01_scene_assembly.
+Implement 03_robot_asset_library: Xform hierarchy, MaterialBindingAPI, semantic primvars.
+Reference pattern: build_sensors.py / validate_sensors.py from 02_sensor_simulation.

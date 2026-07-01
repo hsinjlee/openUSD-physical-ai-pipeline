@@ -1,0 +1,36 @@
+#usda 1.0
+(
+    defaultPrim = "SensorRig"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "SensorRig"
+{
+    def Xform "LiDAR"
+    {
+        custom double sensor:lidar:horizontalFovEnd = 180
+        custom double sensor:lidar:horizontalFovStart = -180
+        custom double sensor:lidar:horizontalResolution = 0.2
+        custom double sensor:lidar:maxRange = 100
+        custom double sensor:lidar:minRange = 0.1
+        custom int sensor:lidar:numChannels = 16
+        custom double sensor:lidar:rotationFrequency = 10
+        custom double sensor:lidar:verticalFovLower = -15
+        custom double sensor:lidar:verticalFovUpper = 15
+        custom token sensor:type = "lidar"
+    }
+
+    def Camera "Camera"
+    {
+        float2 clippingRange = (0.1, 1000)
+        float focalLength = 24
+        float horizontalAperture = 20.955
+        custom double sensor:camera:frameRate = 30
+        custom int sensor:camera:imageHeight = 1080
+        custom int sensor:camera:imageWidth = 1920
+        custom token sensor:type = "camera"
+        float verticalAperture = 15.2908
+    }
+}
+
