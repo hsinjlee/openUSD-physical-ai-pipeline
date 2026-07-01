@@ -57,11 +57,13 @@ and what comes next — so the next session picks up cleanly)
 ### Completed:
 - [x] 01_scene_assembly — LIVRPS composition, VariantSets, defaultPrim, usdchecker ✓
 - [x] 02_sensor_simulation — LiDAR + Camera sensor prims, custom sensor:* attributes, usdchecker ✓
-- [ ] 03_robot_asset_library
+- [x] 03_robot_asset_library — Xform link hierarchy, MaterialBindingAPI, semantic primvars, usdchecker ✓
 - [ ] 04_physics_annotation
 - [ ] 05_tensorrt_inference_bridge
 - [ ] 06_ros2_usdz_export
 
 ### Next session should start with:
-Implement 03_robot_asset_library: Xform hierarchy, MaterialBindingAPI, semantic primvars.
-Reference pattern: build_sensors.py / validate_sensors.py from 02_sensor_simulation.
+Implement 04_physics_annotation: UsdPhysics CollisionAPI, MassAPI, RevoluteJoint.
+Reference pattern: build_robot.py / validate_robot.py from 03_robot_asset_library.
+The Base/Arm Geom prims are already separated from their link Xforms specifically
+so CollisionAPI can attach to Geom without disturbing the transform hierarchy.
