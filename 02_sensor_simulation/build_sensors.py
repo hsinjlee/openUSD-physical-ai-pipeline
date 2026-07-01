@@ -44,6 +44,31 @@ def _add_lidar(stage: Usd.Stage, path: str) -> UsdGeom.Xform:
     return lidar
 
 
+def _add_camera(stage: Usd.Stage, path: str) -> UsdGeom.Camera:
+    """Define a Camera sensor prim with standard and custom attributes.
+
+    Physical AI purpose:
+      UsdGeom.Camera standardises intrinsic parameters so any USD-aware
+      renderer or vision pipeline can extract focal length and aperture
+      without bespoke parsing. Custom sensor:camera: attrs carry
+      runtime-specific config (resolution, frame rate) in the same prim.
+    """
+    cam = UsdGeom.Camera.Define(stage, path)
+    # Standard UsdGeom.Camera intrinsics (millimetre units per USD convention)
+    cam.CreateFocalLengthAttr().Set(24.0)           # 24 mm — wide-angle robot camera
+    cam.CreateHorizontalApertureAttr().Set(20.955)  # APS-C sensor width
+    cam.CreateVerticalApertureAttr().Set(15.2908)   # APS-C sensor height
+    cam.CreateClippingRangeAttr().Set((0.1, 1000.0))
+
+    # Custom sensor attributes for runtime config
+    prim = cam.GetPrim()
+    prim.CreateAttribute("sensor:type", Sdf.ValueTypeNames.Token).Set("camera")
+    prim.CreateAttribute("sensor:camera:imageWidth",  Sdf.ValueTypeNames.Int).Set(1920)
+    prim.CreateAttribute("sensor:camera:imageHeight", Sdf.ValueTypeNames.Int).Set(1080)
+    prim.CreateAttribute("sensor:camera:frameRate",   Sdf.ValueTypeNames.Float).Set(30.0)
+    return cam
+
+
 def build_sensors(output_path: str) -> Usd.Stage:
     """Create and save a USD sensor-rig stage; return the open stage.
 
@@ -60,6 +85,7 @@ def build_sensors(output_path: str) -> Usd.Stage:
     UsdGeom.SetStageMetersPerUnit(stage, 1.0)
 
     _add_lidar(stage, "/SensorRig/LiDAR")
+    _add_camera(stage, "/SensorRig/Camera")
 
     stage.Save()
     return stage
