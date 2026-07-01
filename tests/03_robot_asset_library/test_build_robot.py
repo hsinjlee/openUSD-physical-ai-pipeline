@@ -150,3 +150,12 @@ def test_arm_geom_semantic_class(tmp_path):
     assert pv.IsDefined(), "primvars:semantic:class missing on Arm/Geom"
     assert pv.Get() == "robot_arm"
     assert pv.GetInterpolation() == UsdGeom.Tokens.constant
+
+
+def test_usdchecker_passes(tmp_path):
+    """Generated robot.usda must pass usdchecker with zero errors."""
+    import validate_robot as vr
+    out = str(tmp_path / "robot.usda")
+    br.build_robot(out)
+    errors = vr.validate(out)
+    assert errors == [], f"usdchecker errors: {errors}"
