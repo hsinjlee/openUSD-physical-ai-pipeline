@@ -1,9 +1,11 @@
 #usda 1.0
 (
     defaultPrim = "Robot"
+    metersPerUnit = 1
     subLayers = [
         @../../03_robot_asset_library/output/robot.usda@
     ]
+    upAxis = "Y"
 )
 
 over "Robot" (

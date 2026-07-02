@@ -11,7 +11,7 @@ Physical AI purpose:
 """
 import os
 import sys
-from pxr import Usd, UsdPhysics, Sdf, Gf
+from pxr import Usd, UsdGeom, UsdPhysics, Sdf, Gf
 
 MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(MODULE_DIR, "output")
@@ -135,6 +135,12 @@ def build_physics(output_path: str) -> Usd.Stage:
     ).replace(os.sep, "/")
     stage.GetRootLayer().subLayerPaths.append(robot_rel)
     stage.SetDefaultPrim(stage.GetPrimAtPath("/Robot"))
+    # Stage metadata does NOT compose through sublayers, so the overlay root
+    # layer must re-author upAxis/metersPerUnit itself; otherwise the composed
+    # stage falls back to centimeters and fails usdchecker's
+    # StageMetadataChecker. Same idiom as 03's build_robot.py.
+    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
+    UsdGeom.SetStageMetersPerUnit(stage, 1.0)
     _add_rigid_body(stage, "/Robot/Base", mass=10.0)
     _add_rigid_body(stage, "/Robot/Arm", mass=2.0)
     # One articulation root: the joint chain below solves as a single

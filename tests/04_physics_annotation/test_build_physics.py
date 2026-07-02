@@ -161,6 +161,17 @@ def test_base_asset_stays_pristine(tmp_path):
             ), spec.path
 
 
+def test_stage_metadata_up_axis_and_meters_per_unit(tmp_path):
+    """The overlay root layer must author upAxis/metersPerUnit itself: stage
+    metadata does not compose through sublayers, so without these the composed
+    stage silently falls back to centimeters and fails usdchecker's
+    StageMetadataChecker."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    assert UsdGeom.GetStageUpAxis(stage) == UsdGeom.Tokens.y
+    assert UsdGeom.GetStageMetersPerUnit(stage) == 1.0
+
+
 def test_arm_joint_frames_coincide_in_world(tmp_path):
     """Invariant guard: both joint frames must resolve to the same world-space
     point; if module 03 ever moves/resizes the Arm, the hand-derived anchor
