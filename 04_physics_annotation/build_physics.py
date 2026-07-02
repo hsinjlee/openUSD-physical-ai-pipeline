@@ -31,11 +31,15 @@ def _ensure_robot_asset() -> None:
       The overlay depends on the base asset existing on disk. Regenerating it
       keeps the demo deterministic; the Sdf.Layer.Find guard avoids re-creating
       a layer that a live stage (e.g. a previous build in the same pytest
-      process) still holds open.
+      process) still holds open. If that live layer's backing file has been
+      removed from disk, re-save it so the sublayer reference stays resolvable.
     """
-    if Sdf.Layer.Find(ROBOT_USDA) is None:
+    layer = Sdf.Layer.Find(ROBOT_USDA)
+    if layer is None:
         os.makedirs(os.path.dirname(ROBOT_USDA), exist_ok=True)
         build_robot(ROBOT_USDA)
+    elif not os.path.isfile(ROBOT_USDA):
+        layer.Save(force=True)
 
 
 def build_physics(output_path: str) -> Usd.Stage:
@@ -46,6 +50,10 @@ def build_physics(output_path: str) -> Usd.Stage:
       pair of files stays relocatable as a unit (no absolute paths — repo
       rule). Physics opinions authored on this stage land in the overlay
       layer, never in the base asset.
+
+    Note: release any previously returned stage for the same output_path
+    before rebuilding — Usd.Stage.CreateNew fails while the old layer is
+    still open.
     """
     _ensure_robot_asset()
     stage = Usd.Stage.CreateNew(output_path)
