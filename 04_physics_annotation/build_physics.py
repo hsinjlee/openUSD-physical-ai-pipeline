@@ -67,6 +67,39 @@ def _add_collision(stage: Usd.Stage, geom_path: str) -> None:
     UsdPhysics.CollisionAPI.Apply(stage.GetPrimAtPath(geom_path))
 
 
+def _add_fixed_base_joint(stage: Usd.Stage) -> UsdPhysics.FixedJoint:
+    """Weld the Base link to the world frame.
+
+    Physical AI purpose:
+      A fixed-base articulation (arm bolted to a table) is the standard
+      manipulator setup. Leaving body0 empty means "the world" in UsdPhysics
+      joint semantics.
+    """
+    joint = UsdPhysics.FixedJoint.Define(stage, "/Robot/FixedBaseJoint")
+    joint.CreateBody1Rel().SetTargets(["/Robot/Base"])
+    return joint
+
+
+def _add_arm_joint(stage: Usd.Stage) -> UsdPhysics.RevoluteJoint:
+    """Connect Base→Arm with a limited revolute joint.
+
+    Physical AI purpose:
+      RevoluteJoint is USD's native articulated-DOF description — the same
+      information a URDF <joint type="revolute"> carries, but living inside
+      the asset. localPos0/1 place the hinge at the Arm cube's bottom face
+      (world y=0.75) in each body's own frame; limits are authored in degrees.
+    """
+    joint = UsdPhysics.RevoluteJoint.Define(stage, "/Robot/ArmJoint")
+    joint.CreateBody0Rel().SetTargets(["/Robot/Base"])
+    joint.CreateBody1Rel().SetTargets(["/Robot/Arm"])
+    joint.CreateAxisAttr(UsdPhysics.Tokens.z)
+    joint.CreateLocalPos0Attr(Gf.Vec3f(0.0, 0.75, 0.0))
+    joint.CreateLocalPos1Attr(Gf.Vec3f(0.0, -0.25, 0.0))
+    joint.CreateLowerLimitAttr(-90.0)
+    joint.CreateUpperLimitAttr(90.0)
+    return joint
+
+
 def build_physics(output_path: str) -> Usd.Stage:
     """Create and save the physics overlay stage; return the open stage.
 
@@ -89,9 +122,13 @@ def build_physics(output_path: str) -> Usd.Stage:
     stage.SetDefaultPrim(stage.GetPrimAtPath("/Robot"))
     _add_rigid_body(stage, "/Robot/Base", mass=10.0)
     _add_rigid_body(stage, "/Robot/Arm", mass=2.0)
+    # One articulation root: the joint chain below solves as a single
+    # reduced-coordinate system (how Isaac Sim ingests robots).
     UsdPhysics.ArticulationRootAPI.Apply(stage.GetPrimAtPath("/Robot"))
     _add_collision(stage, "/Robot/Base/Geom")
     _add_collision(stage, "/Robot/Arm/Geom")
+    _add_fixed_base_joint(stage)
+    _add_arm_joint(stage)
     stage.Save()
     return stage
 

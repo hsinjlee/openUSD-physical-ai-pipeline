@@ -82,3 +82,45 @@ def test_robot_is_articulation_root(tmp_path):
     out = str(tmp_path / "robot_physics.usda")
     stage = bp.build_physics(out)
     assert stage.GetPrimAtPath("/Robot").HasAPI(UsdPhysics.ArticulationRootAPI)
+
+
+def test_fixed_base_joint_anchors_robot_to_world(tmp_path):
+    """FixedJoint with body1=Base and no body0 welds the robot to the world
+    frame so it doesn't fall under gravity."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    joint = UsdPhysics.FixedJoint(stage.GetPrimAtPath("/Robot/FixedBaseJoint"))
+    assert joint
+    assert joint.GetBody1Rel().GetTargets() == [Sdf.Path("/Robot/Base")]
+    assert joint.GetBody0Rel().GetTargets() == []
+
+
+def test_arm_joint_connects_base_to_arm(tmp_path):
+    """RevoluteJoint body0/body1 define the parent→child kinematic pair —
+    the USD equivalent of a URDF <joint><parent/><child/>."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    joint = UsdPhysics.RevoluteJoint(stage.GetPrimAtPath("/Robot/ArmJoint"))
+    assert joint
+    assert joint.GetBody0Rel().GetTargets() == [Sdf.Path("/Robot/Base")]
+    assert joint.GetBody1Rel().GetTargets() == [Sdf.Path("/Robot/Arm")]
+
+
+def test_arm_joint_axis_and_limits(tmp_path):
+    """Z-axis revolute with ±90° limits (UsdPhysics limits are degrees)."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    joint = UsdPhysics.RevoluteJoint(stage.GetPrimAtPath("/Robot/ArmJoint"))
+    assert joint.GetAxisAttr().Get() == "Z"
+    assert joint.GetLowerLimitAttr().Get() == -90.0
+    assert joint.GetUpperLimitAttr().Get() == 90.0
+
+
+def test_arm_joint_local_anchors(tmp_path):
+    """Anchor at the Arm cube's bottom face (world y=0.75), expressed in each
+    body's local frame: Base at origin → (0, 0.75, 0); Arm at y=1 → (0, -0.25, 0)."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    joint = UsdPhysics.RevoluteJoint(stage.GetPrimAtPath("/Robot/ArmJoint"))
+    assert joint.GetLocalPos0Attr().Get() == Gf.Vec3f(0.0, 0.75, 0.0)
+    assert joint.GetLocalPos1Attr().Get() == Gf.Vec3f(0.0, -0.25, 0.0)
