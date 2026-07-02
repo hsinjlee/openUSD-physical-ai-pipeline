@@ -42,6 +42,20 @@ def _ensure_robot_asset() -> None:
         layer.Save(force=True)
 
 
+def _add_rigid_body(stage: Usd.Stage, link_path: str, mass: float) -> None:
+    """Mark a link Xform as a dynamic rigid body with an explicit mass.
+
+    Physical AI purpose:
+      RigidBodyAPI on the link Xform (not the Geom) makes the whole link one
+      dynamic body; MassAPI overrides density-derived mass with the measured
+      value a real robot datasheet provides — critical for sim-to-real
+      transfer of dynamics.
+    """
+    prim = stage.GetPrimAtPath(link_path)
+    UsdPhysics.RigidBodyAPI.Apply(prim)
+    UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(mass)
+
+
 def build_physics(output_path: str) -> Usd.Stage:
     """Create and save the physics overlay stage; return the open stage.
 
@@ -62,6 +76,8 @@ def build_physics(output_path: str) -> Usd.Stage:
     ).replace(os.sep, "/")
     stage.GetRootLayer().subLayerPaths.append(robot_rel)
     stage.SetDefaultPrim(stage.GetPrimAtPath("/Robot"))
+    _add_rigid_body(stage, "/Robot/Base", mass=10.0)
+    _add_rigid_body(stage, "/Robot/Arm", mass=2.0)
     stage.Save()
     return stage
 

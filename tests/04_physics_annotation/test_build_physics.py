@@ -46,3 +46,22 @@ def test_composed_stage_exposes_robot_links(tmp_path):
     for path in ("/Robot", "/Robot/Base", "/Robot/Arm",
                  "/Robot/Base/Geom", "/Robot/Arm/Geom"):
         assert stage.GetPrimAtPath(path).IsValid(), f"{path} missing from composition"
+
+
+def test_links_are_rigid_bodies(tmp_path):
+    """Base and Arm must carry RigidBodyAPI — joints only act on rigid bodies."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    for link in ("/Robot/Base", "/Robot/Arm"):
+        assert stage.GetPrimAtPath(link).HasAPI(UsdPhysics.RigidBodyAPI), link
+
+
+def test_link_masses(tmp_path):
+    """MassAPI must author explicit masses: Base 10 kg, Arm 2 kg."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    expected = {"/Robot/Base": 10.0, "/Robot/Arm": 2.0}
+    for link, mass in expected.items():
+        prim = stage.GetPrimAtPath(link)
+        assert prim.HasAPI(UsdPhysics.MassAPI), link
+        assert UsdPhysics.MassAPI(prim).GetMassAttr().Get() == mass
