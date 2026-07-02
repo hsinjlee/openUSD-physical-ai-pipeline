@@ -58,12 +58,16 @@ and what comes next — so the next session picks up cleanly)
 - [x] 01_scene_assembly — LIVRPS composition, VariantSets, defaultPrim, usdchecker ✓
 - [x] 02_sensor_simulation — LiDAR + Camera sensor prims, custom sensor:* attributes, usdchecker ✓
 - [x] 03_robot_asset_library — Xform link hierarchy, MaterialBindingAPI, semantic primvars, usdchecker ✓
-- [ ] 04_physics_annotation
+- [~] 04_physics_annotation — IN PROGRESS on branch feature/04-physics-annotation (5 of 7 plan tasks done)
 - [ ] 05_tensorrt_inference_bridge
 - [ ] 06_ros2_usdz_export
 
 ### Next session should start with:
-Implement 04_physics_annotation: UsdPhysics CollisionAPI, MassAPI, RevoluteJoint.
-Reference pattern: build_robot.py / validate_robot.py from 03_robot_asset_library.
-The Base/Arm Geom prims are already separated from their link Xforms specifically
-so CollisionAPI can attach to Geom without disturbing the transform hierarchy.
+Resume 04_physics_annotation on branch feature/04-physics-annotation (local only, not pushed).
+Read the full handoff first: ~/.claude/session-data/2026-07-02-physics-annot-04-session.tmp
+Plan: docs/superpowers/plans/2026-07-02-04-physics-annotation.md (Tasks 1-5 implemented;
+Task 5 commit 400f982 still needs its spec + quality reviews). Remaining: Task 6
+(validate_physics.py + test, mirroring 03's validator — use UsdUtils.ComplianceChecker,
+there is NO usdchecker CLI in this env) and Task 7 (finalize these handoff notes).
+Builder + 15 passing tests are complete; overlay-layer output robot_physics.usda is
+committed. Then final code review and merge/PR (PRs go through the hsinjlee account).
