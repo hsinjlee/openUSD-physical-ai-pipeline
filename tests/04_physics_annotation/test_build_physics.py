@@ -6,7 +6,7 @@ import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parents[2] / "04_physics_annotation"))
 
 import build_physics as bp  # noqa: E402
-from pxr import Usd, UsdPhysics, Sdf, Gf
+from pxr import Usd, UsdPhysics, Sdf, Gf, UsdGeom
 import pytest
 
 
@@ -124,3 +124,57 @@ def test_arm_joint_local_anchors(tmp_path):
     joint = UsdPhysics.RevoluteJoint(stage.GetPrimAtPath("/Robot/ArmJoint"))
     assert joint.GetLocalPos0Attr().Get() == Gf.Vec3f(0.0, 0.75, 0.0)
     assert joint.GetLocalPos1Attr().Get() == Gf.Vec3f(0.0, -0.25, 0.0)
+
+
+def test_physics_scene_gravity(tmp_path):
+    """PhysicsScene declares standard gravity matching the Y-up, meters stage."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    scene = UsdPhysics.Scene(stage.GetPrimAtPath("/Robot/PhysicsScene"))
+    assert scene
+    assert scene.GetGravityDirectionAttr().Get() == Gf.Vec3f(0.0, -1.0, 0.0)
+    assert scene.GetGravityMagnitudeAttr().Get() == pytest.approx(9.81)
+
+
+def test_base_asset_stays_pristine(tmp_path):
+    """THE core guarantee of this module: after building the overlay, 03's
+    robot.usda layer contains zero physics opinions — verified structurally
+    (typeNames, applied apiSchemas, physics:* properties), not by substring."""
+    out = str(tmp_path / "robot_physics.usda")
+    bp.build_physics(out)
+    robot_layer = Sdf.Layer.FindOrOpen(bp.ROBOT_USDA)
+    assert robot_layer is not None
+
+    def walk(spec):
+        yield spec
+        for child in spec.nameChildren:
+            yield from walk(child)
+
+    for root in robot_layer.rootPrims:
+        for spec in walk(root):
+            assert "Physics" not in (spec.typeName or ""), spec.path
+            if spec.HasInfo("apiSchemas"):
+                applied = list(spec.GetInfo("apiSchemas").GetAddedOrExplicitItems())
+                assert not any("Physics" in s for s in applied), spec.path
+            assert not any(
+                p.name.startswith("physics:") for p in spec.properties
+            ), spec.path
+
+
+def test_arm_joint_frames_coincide_in_world(tmp_path):
+    """Invariant guard: both joint frames must resolve to the same world-space
+    point; if module 03 ever moves/resizes the Arm, the hand-derived anchor
+    constants go stale and this catches the hinge detaching from the geometry."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    joint = UsdPhysics.RevoluteJoint(stage.GetPrimAtPath("/Robot/ArmJoint"))
+    t = Usd.TimeCode.Default()
+    base_xf = UsdGeom.Xformable(stage.GetPrimAtPath("/Robot/Base"))
+    arm_xf = UsdGeom.Xformable(stage.GetPrimAtPath("/Robot/Arm"))
+    p0 = base_xf.ComputeLocalToWorldTransform(t).Transform(
+        Gf.Vec3d(joint.GetLocalPos0Attr().Get())
+    )
+    p1 = arm_xf.ComputeLocalToWorldTransform(t).Transform(
+        Gf.Vec3d(joint.GetLocalPos1Attr().Get())
+    )
+    assert Gf.IsClose(p0, p1, 1e-6), f"joint frames diverge: {p0} vs {p1}"

@@ -100,6 +100,21 @@ def _add_arm_joint(stage: Usd.Stage) -> UsdPhysics.RevoluteJoint:
     return joint
 
 
+def _add_physics_scene(stage: Usd.Stage) -> UsdPhysics.Scene:
+    """Define the simulation context (gravity).
+
+    Physical AI purpose:
+      PhysicsScene tells any UsdPhysics runtime how to integrate the world —
+      here standard Earth gravity along -Y to match the Y-up, meters stage.
+      Kept under /Robot so all prims stay inside the defaultPrim hierarchy;
+      production scenes usually place it at stage root instead.
+    """
+    scene = UsdPhysics.Scene.Define(stage, "/Robot/PhysicsScene")
+    scene.CreateGravityDirectionAttr(Gf.Vec3f(0.0, -1.0, 0.0))
+    scene.CreateGravityMagnitudeAttr(9.81)
+    return scene
+
+
 def build_physics(output_path: str) -> Usd.Stage:
     """Create and save the physics overlay stage; return the open stage.
 
@@ -129,6 +144,7 @@ def build_physics(output_path: str) -> Usd.Stage:
     _add_collision(stage, "/Robot/Arm/Geom")
     _add_fixed_base_joint(stage)
     _add_arm_joint(stage)
+    _add_physics_scene(stage)
     stage.Save()
     return stage
 
