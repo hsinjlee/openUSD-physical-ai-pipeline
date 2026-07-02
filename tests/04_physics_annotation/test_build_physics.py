@@ -65,3 +65,20 @@ def test_link_masses(tmp_path):
         prim = stage.GetPrimAtPath(link)
         assert prim.HasAPI(UsdPhysics.MassAPI), link
         assert UsdPhysics.MassAPI(prim).GetMassAttr().Get() == mass
+
+
+def test_geoms_have_collision(tmp_path):
+    """CollisionAPI goes on the Geom shape prims — 03 separated Geom from the
+    link Xform precisely so collision attaches without touching transforms."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    for geom in ("/Robot/Base/Geom", "/Robot/Arm/Geom"):
+        assert stage.GetPrimAtPath(geom).HasAPI(UsdPhysics.CollisionAPI), geom
+
+
+def test_robot_is_articulation_root(tmp_path):
+    """/Robot must carry ArticulationRootAPI so the joint chain solves as one
+    articulation (how Isaac Sim ingests robots)."""
+    out = str(tmp_path / "robot_physics.usda")
+    stage = bp.build_physics(out)
+    assert stage.GetPrimAtPath("/Robot").HasAPI(UsdPhysics.ArticulationRootAPI)

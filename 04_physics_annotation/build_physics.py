@@ -56,6 +56,17 @@ def _add_rigid_body(stage: Usd.Stage, link_path: str, mass: float) -> None:
     UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(mass)
 
 
+def _add_collision(stage: Usd.Stage, geom_path: str) -> None:
+    """Enable collision on a shape prim.
+
+    Physical AI purpose:
+      CollisionAPI on the Geom (not the link Xform) lets the physics engine
+      derive the collider from the render shape while the transform hierarchy
+      stays untouched — the exact separation module 03 prepared for.
+    """
+    UsdPhysics.CollisionAPI.Apply(stage.GetPrimAtPath(geom_path))
+
+
 def build_physics(output_path: str) -> Usd.Stage:
     """Create and save the physics overlay stage; return the open stage.
 
@@ -78,6 +89,9 @@ def build_physics(output_path: str) -> Usd.Stage:
     stage.SetDefaultPrim(stage.GetPrimAtPath("/Robot"))
     _add_rigid_body(stage, "/Robot/Base", mass=10.0)
     _add_rigid_body(stage, "/Robot/Arm", mass=2.0)
+    UsdPhysics.ArticulationRootAPI.Apply(stage.GetPrimAtPath("/Robot"))
+    _add_collision(stage, "/Robot/Base/Geom")
+    _add_collision(stage, "/Robot/Arm/Geom")
     stage.Save()
     return stage
 
