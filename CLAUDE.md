@@ -63,11 +63,14 @@ and what comes next — so the next session picks up cleanly)
 - [ ] 06_ros2_usdz_export
 
 ### Next session should start with:
-Resume 04_physics_annotation on branch feature/04-physics-annotation (local only, not pushed).
-Read the full handoff first: ~/.claude/session-data/2026-07-02-physics-annot-04-session.tmp
-Plan: docs/superpowers/plans/2026-07-02-04-physics-annotation.md (Tasks 1-5 implemented;
-Task 5 commit 400f982 still needs its spec + quality reviews). Remaining: Task 6
-(validate_physics.py + test, mirroring 03's validator — use UsdUtils.ComplianceChecker,
-there is NO usdchecker CLI in this env) and Task 7 (finalize these handoff notes).
-Builder + 15 passing tests are complete; overlay-layer output robot_physics.usda is
-committed. Then final code review and merge/PR (PRs go through the hsinjlee account).
+Resume 04_physics_annotation on branch feature/04-physics-annotation (pushed to
+origin, in sync at e6b9ce7, working tree clean).
+Read the CURRENT handoff first: ~/.claude/session-data/2026-07-02-physics-04-handoff2-session.tmp
+(it supersedes 2026-07-02-physics-annot-04-session.tmp, which has the fuller history).
+Plan: docs/superpowers/plans/2026-07-02-04-physics-annotation.md. Tasks 1-5
+implemented; Task 5 spec review done (fix c3ce2bd), quality-review fixes applied
+(e6b9ce7) but the final re-review verdict is still outstanding — do that first.
+Remaining: Task 6 (validate_physics.py + test, mirroring 03's validator — use
+UsdUtils.ComplianceChecker, there is NO usdchecker CLI in this env) and Task 7
+(finalize these handoff notes). Builder + 16 module tests (51 total) all pass.
+Then final code review and merge/PR (PRs go through the hsinjlee account).
