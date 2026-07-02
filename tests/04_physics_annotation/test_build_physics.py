@@ -139,7 +139,9 @@ def test_physics_scene_gravity(tmp_path):
 def test_base_asset_stays_pristine(tmp_path):
     """THE core guarantee of this module: after building the overlay, 03's
     robot.usda layer contains zero physics opinions — verified structurally
-    (typeNames, applied apiSchemas, physics:* properties), not by substring."""
+    (typeNames, applied apiSchemas, physics:* properties), not by substring.
+    Known limitation: the walk only descends nameChildren, not variantSets
+    (fine today — 03's asset authors no variants)."""
     out = str(tmp_path / "robot_physics.usda")
     bp.build_physics(out)
     robot_layer = Sdf.Layer.FindOrOpen(bp.ROBOT_USDA)
@@ -170,6 +172,11 @@ def test_stage_metadata_up_axis_and_meters_per_unit(tmp_path):
     stage = bp.build_physics(out)
     assert UsdGeom.GetStageUpAxis(stage) == UsdGeom.Tokens.y
     assert UsdGeom.GetStageMetersPerUnit(stage) == 1.0
+    # Guard against a vacuous pass: the fallback upAxis is also "Y", so the
+    # equality checks alone stay green if authoring is removed. These resolve
+    # from the root layer only — False when only the sublayer authors them.
+    assert stage.HasAuthoredMetadata("upAxis")
+    assert stage.HasAuthoredMetadata("metersPerUnit")
 
 
 def test_arm_joint_frames_coincide_in_world(tmp_path):
